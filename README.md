@@ -3,7 +3,20 @@
 
 This is an api example for a todo list.
 
-## Install
+## Documentation
+
+* [Installation](#Installation)
+* [Getting Started](#Run-the-app)
+* [Rest API](#REST-API)
+	- [Get list of todos](#Get-list-of-todos)
+	- [Create a new todo](#Create-a-new-todo)
+	- [Get todo by id](#Get-todo-by-id)
+    - [Get a non-existent todo](#Get-a-non-existent-todo)
+    - [Change a toggle todo](#Change-a-toggle-todo-status-complete-/-failed)
+    - [Get completed todos](#Get-filtered-tasks-by-type-completed)
+    - [Get current todos](#Get-filtered-tasks-by-type-current)
+
+## Installation
 
     git clone https://github.com/loveyousomuch554/Todo-API.git & npm i
 
