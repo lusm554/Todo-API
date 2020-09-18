@@ -6,12 +6,12 @@ const PORT = config.get('port'), mongoID = config.get('mongoID')
 const { Todo: Todo_model } = require('./models/todo')
 const mongoose = require('mongoose')
 
-// Use cors for testing api 
+// Access to cors
 const cors = require('cors'); 
 app.use(cors());
 
 // Connect database 
-mongoose.connect(mongoID, { useNewUrlParser: true , useUnifiedTopology: true});
+mongoose.connect(mongoID, { useNewUrlParser: true , useUnifiedTopology: true });
 mongoose.set('useFindAndModify', false)
 
 // Parse application/x-www-form-urlencoded
@@ -21,14 +21,14 @@ app.use(bodyParser.json())
 
 // Get all tasks 
 app.get('/todos', (req, res) => {   
-    Todo_model.find({}, (err, todos) => {
+    Todo_model.find({}, (err, tasks) => {
         if(err) {
             res.status(500).send('INTERNAL SERVER ERROR')
             console.error(err)
             return 
         }
 
-        res.json(todos)
+        res.json(tasks)
     })
 })
 
@@ -60,7 +60,7 @@ app.get('/todos/filtered/current', (req, res) => {
 
 // Get task by id 
 app.get('/todos/:id', isTodoExist, (req, res) => {
-    res.json(req.todo)
+    res.json(req.task)
 })
 
 // Add new task  
@@ -74,21 +74,21 @@ app.post('/todos', (req, res) => {
         return res.status(400).send('BAD REQUEST')
     }
 
-    const todo = { task, done }
-    Todo_model.create(todo, (err, doc) => {
+    const newTodo = { task, done }
+    Todo_model.create(newTodo, (err, todo) => {
         if(err) {
             res.status(500).send('INTERNAL SERVER ERROR')
             console.error(err)
             return 
         }
 
-        res.json(doc)
+        res.json(todo)
     })
 })
 
-// Toggle todo status complete / failed
+// Toggle task status complete / failed
 app.put('/todos/:id', isTodoExist, (req, res) => {
-    let { done } = req.todo
+    let { done } = req.task
     let { id } = req.params
 
     Todo_model.findOneAndUpdate({ _id: id }, { done: !done }, (err, todo) => {
@@ -103,10 +103,11 @@ app.put('/todos/:id', isTodoExist, (req, res) => {
     })
 })
 
+// Delete task 
 app.delete('/todos/:id', isTodoExist, (req, res) => {
-    let { _id: id } = req.todo
+    let { _id } = req.task
 
-    Todo_model.findByIdAndDelete(id, (err, deletedTodo) => {
+    Todo_model.findByIdAndDelete(_id, (err, deletedTodo) => {
         if(err) {
             res.status(500).send('INTERNAL SERVER ERROR')
             console.log(err)
@@ -120,17 +121,18 @@ app.delete('/todos/:id', isTodoExist, (req, res) => {
 async function isTodoExist(req, res, next) {
     const { id } = req.params
 
-    Todo_model.findById(id, (err, todo) => {
+    Todo_model.findById(id, (err, task) => {
         if(err) {
             res.status(500).send('INTERNAL SERVER ERROR')
             return
         }
-        else if (todo === null) {
+        else if (task === null) {
             res.sendStatus(404)
             return
         }
 
-        req.todo = todo
+        // Add a task to the request for further use
+        req.task = task
         next()
     }) 
 }
