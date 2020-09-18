@@ -6,19 +6,20 @@ const PORT = config.get('port'), mongoID = config.get('mongoID')
 const { Todo: Todo_model } = require('./models/todo')
 const mongoose = require('mongoose')
 
-// use cors for testing api 
+// Use cors for testing api 
 const cors = require('cors'); 
 app.use(cors());
 
+// Connect database 
 mongoose.connect(mongoID, { useNewUrlParser: true , useUnifiedTopology: true});
 mongoose.set('useFindAndModify', false)
 
-// parse application/x-www-form-urlencoded
+// Parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }))
-// parse application/json
+// Parse application/json
 app.use(bodyParser.json())
 
-
+// Get all tasks 
 app.get('/todos', (req, res) => {   
     Todo_model.find({}, (err, todos) => {
         if(err) {
@@ -31,6 +32,7 @@ app.get('/todos', (req, res) => {
     })
 })
 
+// Get filtered tasks by type completed
 app.get('/todos/filtered/completed', async (req, res) => {
     Todo_model.find({ done: true }, (err, completedTasks) => {
         if(err) {
@@ -43,6 +45,7 @@ app.get('/todos/filtered/completed', async (req, res) => {
     })
 })
 
+// Get filtered tasks by type current
 app.get('/todos/filtered/current', (req, res) => {
     Todo_model.find({ done: false }, (err, currentTasks) => {
         if(err) {
@@ -55,13 +58,16 @@ app.get('/todos/filtered/current', (req, res) => {
     })
 })
 
+// Get task by id 
 app.get('/todos/:id', isTodoExist, (req, res) => {
     res.json(req.todo)
 })
 
+// Add new task  
 app.post('/todos', (req, res) => {
     const { task, done } = req.body
-    // ограничение символов для записи 
+
+    // Character limit for writing
     const N = 200;
 
     if(task.length > N) {
@@ -80,6 +86,7 @@ app.post('/todos', (req, res) => {
     })
 })
 
+// Toggle recording status complete / failed
 app.put('/todos/:id', isTodoExist, (req, res) => {
     let { done } = req.todo
     let { id } = req.params
@@ -96,6 +103,7 @@ app.put('/todos/:id', isTodoExist, (req, res) => {
     })
 })
 
+// Middleware for checking the existence of a task
 async function isTodoExist(req, res, next) {
     const { id } = req.params
     let todo = await Todo_model.findById(id)
@@ -107,6 +115,7 @@ async function isTodoExist(req, res, next) {
     next()
 }
 
+// Start server
 app.listen(PORT, () => {
     console.log('Server run on http://localhost:8080')
 }) 
