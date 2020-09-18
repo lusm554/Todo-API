@@ -1,84 +1,64 @@
 const express = require('express')
 const app = express()
 const bodyParser = require('body-parser')
-const { nanoid } = require('nanoid')
 const config = require('config')
 const PORT = config.get('port'), mongoID = config.get('mongoID')
-const model = require('./models/todo')
+const { Todo: Todo_model } = require('./models/todo')
+const mongoose = require('mongoose')
 
 // use cors for testing api 
 const cors = require('cors'); 
 app.use(cors());
 
-const Todos = new Map()
+mongoose.connect(mongoID, { useNewUrlParser: true , useUnifiedTopology: true});
+mongoose.set('useFindAndModify', false)
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }))
 // parse application/json
 app.use(bodyParser.json())
 
-/**
- * Получить все записи. 
- * 
- * @example fetch('http://localhost:8080/todos/') 
- */
+
 app.get('/todos', (req, res) => {   
-    const AllTodos = getAllTodos()
-    
-    res.json(AllTodos)
-})
+    Todo_model.find({}, (err, todos) => {
+        if(err) {
+            res.status(500).send('INTERNAL SERVER ERROR')
+            console.error(err)
+            return 
+        }
 
-/**
- * Получить выполненные записи.
- * 
- * @example fetch('http://localhost:8080/todos/filtered/completed')
- */
-app.get('/todos/filtered/completed', (req, res) => {
-    const AllTodos = getAllTodos()
-    const completed = AllTodos.filter(todo => {
-        return todo.done
+        res.json(todos)
     })
-    
-    res.json({ completed })
 })
 
-/**
- * Получить текущие записи.
- *  
- * @example fetch('http://localhost:8080/todos/filtered/current')
- */
+app.get('/todos/filtered/completed', async (req, res) => {
+    Todo_model.find({ done: true }, (err, completedTasks) => {
+        if(err) {
+            res.status(500).send('INTERNAL SERVER ERROR')
+            console.error(err)
+            return 
+        }
+
+        res.json(completedTasks)
+    })
+})
+
 app.get('/todos/filtered/current', (req, res) => {
-    const AllTodos = getAllTodos()
-    const current = AllTodos.filter(todo => {
-        return !todo.done
+    Todo_model.find({ done: false }, (err, currentTasks) => {
+        if(err) {
+            res.status(500).send('INTERNAL SERVER ERROR')
+            console.error(err)
+            return 
+        }
+
+        res.json(currentTasks)
     })
-    
-    res.json({ current })
 })
 
-/**
- * Получить запись по id.
- * 
- * @example fetch('http://localhost:8080/todos/<id_here>')
- */
 app.get('/todos/:id', isTodoExist, (req, res) => {
-    let todo = req.todo
-
-    res.json(todo)
+    res.json(req.todo)
 })
 
-
-/**
- * Добавление новой записи. 
- * 
- * @example fetch('http://localhost:8080/todos' {
- *  method: 'POST',
- *  headers: {
- *    'Content-Type': 'application/json'
- *  },
- *  body: "{\"task\":\"do something\",\"done\":false}"
- * })
- */
 app.post('/todos', (req, res) => {
     const { task, done } = req.body
     // ограничение символов для записи 
@@ -88,46 +68,45 @@ app.post('/todos', (req, res) => {
         return res.status(400).send('BAD REQUEST')
     }
 
-    let id = nanoid()
-    let todo = { id, task, done }
+    const todo = { task, done }
+    Todo_model.create(todo, (err, doc) => {
+        if(err) {
+            res.status(500).send('INTERNAL SERVER ERROR')
+            console.error(err)
+            return 
+        }
 
-    Todos.set(id, todo)
-    res.json(todo)
+        res.json(doc)
+    })
 })
 
-/**
- * Переключение статуса записи Выполнено/Не выполнено 
- * 
- * @example fetch('http://localhost:8080/todos/<id_here>', {
- *  method: 'PUT',
- *  headers: {
- *    'Content-Type': 'application/json'
- *  }
- * })
- */
 app.put('/todos/:id', isTodoExist, (req, res) => {
-    let { id, task, done } = req.todo
-    let todo = { id, task, done: !done }
+    let { done } = req.todo
+    let { id } = req.params
 
-    Todos.set(id, todo)
-    res.json(todo)
+    Todo_model.findOneAndUpdate({ _id: id }, { done: !done }, (err, todo) => {
+        if(err) {
+            res.status(500).send('BAD REQUEST')
+            console.error(err)
+            return 
+        }
+
+        todo.done = !done
+        res.json(todo)
+    })
 })
 
-function getAllTodos() {
-    return Array.from( Todos.values() )
-}
-
-function isTodoExist(req, res, next) {
+async function isTodoExist(req, res, next) {
     const { id } = req.params
-    let todo = Todos.get(id)
+    let todo = await Todo_model.findById(id)
 
-    if(todo === undefined) {
+    if(todo === null) {
         return res.status(400).send('BAD REQUEST')
     }
     req.todo = todo
     next()
 }
 
-app.listen(8080, () => {
+app.listen(PORT, () => {
     console.log('Server run on http://localhost:8080')
 }) 
