@@ -2,6 +2,9 @@ const express = require('express')
 const app = express()
 const bodyParser = require('body-parser')
 const { nanoid } = require('nanoid')
+const config = require('config')
+const PORT = config.get('port'), mongoID = config.get('mongoID')
+const model = require('./models/todo')
 
 // use cors for testing api 
 const cors = require('cors'); 
