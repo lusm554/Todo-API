@@ -125,4 +125,6 @@ function isTodoExist(req, res, next) {
     next()
 }
 
-app.listen(8080) 
+app.listen(8080, () => {
+    console.log('Server run on http://localhost:8080')
+}) 
