@@ -103,15 +103,33 @@ app.put('/todos/:id', isTodoExist, (req, res) => {
     })
 })
 
+app.delete('/todos/:id', isTodoExist, (req, res) => {
+    let { _id: id } = req.todo
+
+    Todo_model.findByIdAndDelete(id, (err, deletedTodo) => {
+        if(err) {
+            res.status(500).send('INTERNAL SERVER ERROR')
+            console.log(err)
+            return
+        }
+        res.json(deletedTodo)
+    })
+})
+
 // Middleware for checking the existence of a task
 async function isTodoExist(req, res, next) {
     const { id } = req.params
 
     Todo_model.findById(id, (err, todo) => {
         if(err) {
-            res.status(404).send('NOT FOUND')
+            res.status(500).send('INTERNAL SERVER ERROR')
             return
         }
+        else if (todo === null) {
+            res.sendStatus(404)
+            return
+        }
+
         req.todo = todo
         next()
     }) 

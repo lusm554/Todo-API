@@ -15,6 +15,7 @@ This is an api example for a todo list.
     - [Change a toggle todo](#Change-a-toggle-todo-status-complete-/-failed)
     - [Get completed todos](#Get-filtered-tasks-by-type-completed)
     - [Get current todos](#Get-filtered-tasks-by-type-current)
+    - [Delete todo by id ](#Delete-todo-by-id)
 
 ## Installation
 
@@ -161,3 +162,22 @@ The REST API to the todo list is described below.
             "__v":0
         }
     ]
+
+## Delete todo by id 
+
+### Request
+
+`DELETE /todos/:id`
+
+    curl -X DELETE http://localhost:8080/todos/5f64b525b3e9f81ed7fd0f5e
+
+### Response
+
+    {
+        "_id":"5f64b525b3e9f81ed7fd0f5e",
+        "task":"some task",
+        "done":true,
+        "created_at":"2020-09-18T15:24:30.977Z",
+        "updatedAt":"2020-09-18T15:24:30.977Z",
+        "__v":0
+    }
