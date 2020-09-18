@@ -25,10 +25,6 @@ This is an api example for a todo list.
 
     npm run server
 
-## Run the tests
-
-    npm run test
-
 # REST API
 
 The REST API to the todo list is described below.
