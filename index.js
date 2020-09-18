@@ -86,14 +86,14 @@ app.post('/todos', (req, res) => {
     })
 })
 
-// Toggle recording status complete / failed
+// Toggle todo status complete / failed
 app.put('/todos/:id', isTodoExist, (req, res) => {
     let { done } = req.todo
     let { id } = req.params
 
     Todo_model.findOneAndUpdate({ _id: id }, { done: !done }, (err, todo) => {
         if(err) {
-            res.status(500).send('BAD REQUEST')
+            res.status(400).send('BAD REQUEST')
             console.error(err)
             return 
         }
@@ -106,13 +106,15 @@ app.put('/todos/:id', isTodoExist, (req, res) => {
 // Middleware for checking the existence of a task
 async function isTodoExist(req, res, next) {
     const { id } = req.params
-    let todo = await Todo_model.findById(id)
 
-    if(todo === null) {
-        return res.status(400).send('BAD REQUEST')
-    }
-    req.todo = todo
-    next()
+    Todo_model.findById(id, (err, todo) => {
+        if(err) {
+            res.status(404).send('NOT FOUND')
+            return
+        }
+        req.todo = todo
+        next()
+    }) 
 }
 
 // Start server
