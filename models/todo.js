@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 const todoSchema = new Schema(
-    { task: String, done: String },
+    { task: String, done: Boolean },
     { timestamps: { createdAt: 'created_at' } }
 )
 
