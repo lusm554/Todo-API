@@ -12,7 +12,7 @@ This is an api example for a todo list.
 	- [Create a new todo](#Create-a-new-todo)
 	- [Get todo by id](#Get-todo-by-id)
     - [Get a non-existent todo](#Get-a-non-existent-todo)
-    - [Change a toggle todo](#Change-a-toggle-todo-status-complete/failed)
+    - [Change a toggle todo](#Change-a-toggle-todo-status)
     - [Get completed todos](#Get-filtered-tasks-by-type-completed)
     - [Get current todos](#Get-filtered-tasks-by-type-current)
     - [Delete todo by id ](#Delete-todo-by-id)
@@ -98,7 +98,7 @@ The REST API to the todo list is described below.
 ### Response
     NOT FOUND
 
-## Change a toggle todo status complete/failed 
+## Change a toggle todo status
 
 ### Request
 
